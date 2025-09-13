@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS reply_votes;
+DROP TABLE IF EXISTS answer_votes;
+DROP TABLE IF EXISTS question_votes;
+DROP TYPE vote;
+DROP TABLE IF EXISTS replies;
+DROP TABLE IF EXISTS answers;
+DROP TABLE IF EXISTS questions;
+DROP TABLE IF EXISTS users;
+DROP EXTENSION IF EXISTS "uuid-ossp";
