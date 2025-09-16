@@ -39,7 +39,7 @@ func (s authServiceImpl) Login(ud dto.UserLogin) (dto.Token, error) {
 
 	user, err := s.authRepository.GetUserByUsername(ud.Username)
 	if err != nil {
-		return tokens, nil
+		return tokens, err
 	}
 
 	err = s.hasher.Compare(user.Password, ud.Password)
