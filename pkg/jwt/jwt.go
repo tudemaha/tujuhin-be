@@ -54,13 +54,18 @@ func (JWT) ValidateAccessToken(token string) (string, error) {
 		return signingKey, nil
 	})
 	if err != nil {
-		log.Printf("ERROR Validate fatal error: %v", err)
+		log.Printf("ERROR ValidateAccessToken fatal error: %v", err)
 		return "", nil
 	}
 
 	if !parsedToken.Valid {
 		log.Println("ERROR VallidateAccessToken fatal error: invalid access token")
 		return "", errors.New("invalid refresh token")
+	}
+
+	if claims.Name == "" || claims.Username == "" {
+		log.Printf("ERROR ValidateAccesToken fatal error: %v", err)
+		return "", nil
 	}
 
 	return claims.ID.String(), nil
@@ -74,7 +79,7 @@ func (JWT) ValidateRefreshToken(token string) (string, error) {
 		return signingKey, nil
 	})
 	if err != nil {
-		log.Printf("ERROR Validate fatal error: %v", err)
+		log.Printf("ERROR ValidateRefreshToken fatal error: %v", err)
 		return "", nil
 	}
 
