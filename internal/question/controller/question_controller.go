@@ -2,16 +2,17 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/tudemaha/tujuhin-be/internal/question/dto"
 	"github.com/tudemaha/tujuhin-be/internal/question/service"
 	"github.com/tudemaha/tujuhin-be/pkg/dto/response"
+	"github.com/tudemaha/tujuhin-be/pkg/server/middleware"
 	"github.com/tudemaha/tujuhin-be/pkg/utils"
 )
 
 type QuestionController struct {
 	questionGroup   *gin.RouterGroup
 	questionService service.QuestionService
+	authMiddleware  middleware.AuthMiddleware
 }
 
 func (qc *QuestionController) handleNewQuestion() gin.HandlerFunc {
@@ -34,7 +35,8 @@ func (qc *QuestionController) handleNewQuestion() gin.HandlerFunc {
 			return
 		}
 
-		if err := qc.questionService.CreateQuestion(question, uuid.MustParse("ffa13b22-8184-4a31-9bb9-12286a499153")); err != nil {
+		userID := c.MustGet("userID").(string)
+		if err := qc.questionService.CreateQuestion(question, userID); err != nil {
 			baseResponse.DefaultBadRequest()
 			resErr := response.NewErrorResponseValue("insert_error", err.Error())
 			baseResponse.Errors = response.NewArrErrorResponse(resErr)
@@ -48,9 +50,9 @@ func (qc *QuestionController) handleNewQuestion() gin.HandlerFunc {
 }
 
 func (qc *QuestionController) InitializeController() {
-	qc.questionGroup.POST("", qc.handleNewQuestion())
+	qc.questionGroup.POST("", qc.authMiddleware.Auth(), qc.handleNewQuestion())
 }
 
-func ProvideQuestionController(rg *gin.RouterGroup, qs service.QuestionService) *QuestionController {
-	return &QuestionController{questionGroup: rg, questionService: qs}
+func NewQuestionController(rg *gin.RouterGroup, qs service.QuestionService, am middleware.AuthMiddleware) *QuestionController {
+	return &QuestionController{questionGroup: rg, questionService: qs, authMiddleware: am}
 }

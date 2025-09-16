@@ -11,6 +11,7 @@ import (
 	questionService "github.com/tudemaha/tujuhin-be/internal/question/service"
 	"github.com/tudemaha/tujuhin-be/pkg/hasher"
 	"github.com/tudemaha/tujuhin-be/pkg/jwt"
+	"github.com/tudemaha/tujuhin-be/pkg/server/middleware"
 )
 
 func InitializeControllers(r *gin.Engine, db *sqlx.DB) {
@@ -20,12 +21,13 @@ func InitializeControllers(r *gin.Engine, db *sqlx.DB) {
 	jwtPkg := jwt.JWT{}
 	authRepoImpl := userRepo.NewAuthRepository(db)
 	authServiceImpl := authService.NewAuthService(authRepoImpl, hasher, jwtPkg)
+	authMiddleware := middleware.NewAuthMiddleware(authServiceImpl)
 	authControllerImpl := authController.NewAuthController(authRoutes, authServiceImpl)
 	authControllerImpl.InitializeController()
 
 	questionRoutes := r.Group("/questions")
-	questionRepoImpl := questionRepo.ProvideQuestionRepository(db)
-	questionServiceImpl := questionService.ProvideQuestionService(questionRepoImpl)
-	questionControllerImpl := questionController.ProvideQuestionController(questionRoutes, questionServiceImpl)
+	questionRepoImpl := questionRepo.NewQuestionRepository(db)
+	questionServiceImpl := questionService.NewQuestionService(questionRepoImpl)
+	questionControllerImpl := questionController.NewQuestionController(questionRoutes, questionServiceImpl, authMiddleware)
 	questionControllerImpl.InitializeController()
 }

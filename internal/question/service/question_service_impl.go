@@ -11,9 +11,10 @@ type questionServiceImpl struct {
 	questionRepo repository.QuestionRepository
 }
 
-func (s questionServiceImpl) CreateQuestion(qd dto.QuestionRequestBody, owner uuid.UUID) error {
+func (s questionServiceImpl) CreateQuestion(qd dto.QuestionRequestBody, owner string) error {
+	userID := uuid.MustParse(owner)
 	question := model.Question{
-		UserID:   owner,
+		UserID:   userID,
 		Question: qd.Question,
 	}
 
@@ -23,6 +24,6 @@ func (s questionServiceImpl) CreateQuestion(qd dto.QuestionRequestBody, owner uu
 	return nil
 }
 
-func ProvideQuestionService(qr repository.QuestionRepository) *questionServiceImpl {
+func NewQuestionService(qr repository.QuestionRepository) *questionServiceImpl {
 	return &questionServiceImpl{questionRepo: qr}
 }

@@ -22,6 +22,6 @@ func (q questionRepositoryImpl) CreateQuestion(qm model.Question) error {
 	return nil
 }
 
-func ProvideQuestionRepository(DB *sqlx.DB) *questionRepositoryImpl {
+func NewQuestionRepository(DB *sqlx.DB) *questionRepositoryImpl {
 	return &questionRepositoryImpl{DB: DB}
 }
