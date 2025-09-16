@@ -34,7 +34,7 @@ func (qc *QuestionController) handleNewQuestion() gin.HandlerFunc {
 			return
 		}
 
-		if err := qc.questionService.CreateQuestion(question, uuid.New()); err != nil {
+		if err := qc.questionService.CreateQuestion(question, uuid.MustParse("ffa13b22-8184-4a31-9bb9-12286a499153")); err != nil {
 			baseResponse.DefaultBadRequest()
 			resErr := response.NewErrorResponseValue("insert_error", err.Error())
 			baseResponse.Errors = response.NewArrErrorResponse(resErr)

@@ -10,12 +10,14 @@ type questionRepositoryImpl struct {
 }
 
 func (q questionRepositoryImpl) CreateQuestion(qm model.Question) error {
-	stmt, err := q.DB.Preparex("INSERT INTO questions (user_id, question) VALUES (?, ?);")
+	stmt, err := q.DB.Preparex(`INSERT INTO questions (user_id, question) VALUES ($1, $2)`)
 	if err != nil {
 		return err
 	}
 
-	stmt.Exec(qm.UserID, qm.Question)
+	if _, err := stmt.Exec(qm.UserID, qm.Question); err != nil {
+		return err
+	}
 
 	return nil
 }
