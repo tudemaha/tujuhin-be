@@ -64,7 +64,7 @@ func (s authServiceImpl) ValidateToken(token string) (string, error) {
 		return "", errors.New("invalid access token")
 	}
 
-	id, err := s.jwt.Validate(token)
+	id, err := s.jwt.ValidateAccessToken(token)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +78,7 @@ func (s authServiceImpl) GenerateAccessToken(token string) (dto.Token, error) {
 		return tokens, errors.New("invalid refresh token")
 	}
 
-	id, err := s.jwt.Validate(token)
+	id, err := s.jwt.ValidateRefreshToken(token)
 	if err != nil {
 		return tokens, err
 	}
