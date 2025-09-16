@@ -20,6 +20,7 @@ func main() {
 	httpServer := server.NewServer()
 	db := database.GetDatabase()
 
+	log.Println("INFO controllers: initializing controllers")
 	controller.InitializeControllers(httpServer.Router, db)
 
 	if err := httpServer.Start(httpAddress); err != nil {
