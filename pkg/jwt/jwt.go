@@ -46,10 +46,11 @@ func (JWT) CreateRefreshToken(id string) (string, error) {
 	return tokenStr, nil
 }
 
-func (JWT) Validate(token string) (string, error) {
+func (JWT) ValidateAccessToken(token string) (string, error) {
 	signingKey := []byte(os.Getenv("SIGNKEY"))
+	claims := AccessPayload{}
 
-	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &claims, func(t *jwt.Token) (any, error) {
 		return signingKey, nil
 	})
 	if err != nil {
@@ -57,12 +58,35 @@ func (JWT) Validate(token string) (string, error) {
 		return "", nil
 	}
 
-	claims, ok := parsedToken.Claims.(jwt.MapClaims)
-	if !parsedToken.Valid || !ok {
-		log.Println("ERROR Vallidate fatal error: invalid access token")
+	if !parsedToken.Valid {
+		log.Println("ERROR VallidateAccessToken fatal error: invalid access token")
 		return "", errors.New("invalid refresh token")
 	}
 
-	id, _ := claims["id"].(string)
-	return id, nil
+	return claims.ID.String(), nil
+}
+
+func (JWT) ValidateRefreshToken(token string) (string, error) {
+	signingKey := []byte(os.Getenv("SIGNKEY"))
+	claims := RefreshPayload{}
+
+	parsedToken, err := jwt.ParseWithClaims(token, &claims, func(t *jwt.Token) (any, error) {
+		return signingKey, nil
+	})
+	if err != nil {
+		log.Printf("ERROR Validate fatal error: %v", err)
+		return "", nil
+	}
+
+	if !parsedToken.Valid {
+		log.Println("ERROR VallidateRefreshToken fatal error: invalid refresh token")
+		return "", errors.New("invalid refresh token")
+	}
+
+	if !claims.IsRT {
+		log.Println("ERROR ValidateRefreshToken fatal error: invalid refresh token")
+		return "", errors.New("invalid refresh token")
+	}
+
+	return claims.ID.String(), nil
 }
