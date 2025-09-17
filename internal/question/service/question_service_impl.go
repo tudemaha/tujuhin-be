@@ -26,10 +26,10 @@ func (s questionServiceImpl) CreateQuestion(qd dto.QuestionRequestBody, owner st
 	return nil
 }
 
-func (s questionServiceImpl) GetAllQuestions() (dto.QuestionsResponse, error) {
+func (s questionServiceImpl) GetAllQuestions(userID string) (dto.QuestionsResponse, error) {
 	var questionsDto dto.QuestionsResponse
 
-	questions, err := s.questionQuery.GetAllQuestionWithOwner()
+	questions, err := s.questionQuery.GetAllQuestionWithOwner(userID)
 	if err != nil {
 		return questionsDto, err
 	}
@@ -43,6 +43,9 @@ func (s questionServiceImpl) GetAllQuestions() (dto.QuestionsResponse, error) {
 		questionDto.Owner.ID = q.User.ID
 		questionDto.Owner.Name = q.User.Name
 		questionDto.Owner.Username = q.User.Username
+		if q.Vote.VoteState != nil {
+			questionDto.VoteState = *q.Vote.VoteState
+		}
 		questionsDto = append(questionsDto, questionDto)
 	}
 

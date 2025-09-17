@@ -17,7 +17,14 @@ type QuestionModel struct {
 
 type QuestionWithOwner struct {
 	QuestionModel
-	User model.User `db:"user"`
+	User model.User   `db:"user"`
+	Vote QuestionVote `db:"vote"`
+}
+
+type QuestionVote struct {
+	ID         uuid.UUID `db:"id"`
+	QuestionID uuid.UUID `db:"question_id"`
+	VoteState  *string   `db:"vote_state"`
 }
 
 type QuestionsWithOwner []QuestionWithOwner
