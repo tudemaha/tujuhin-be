@@ -4,12 +4,20 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/tudemaha/tujuhin-be/internal/auth/model"
 )
 
-type Question struct {
-	ID        uuid.UUID
-	UserID    uuid.UUID
-	Question  string
-	TotalVote int
-	CreatedAt time.Time
+type QuestionModel struct {
+	ID        uuid.UUID `db:"id"`
+	UserID    uuid.UUID `db:"user_id"`
+	Question  string    `db:"question"`
+	TotalVote int       `db:"total_vote"`
+	CreatedAt time.Time `db:"created_at"`
 }
+
+type QuestionWithOwner struct {
+	QuestionModel
+	User model.User `db:"user"`
+}
+
+type QuestionsWithOwner []QuestionWithOwner

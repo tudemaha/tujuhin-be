@@ -49,8 +49,28 @@ func (qc *QuestionController) handleNewQuestion() gin.HandlerFunc {
 	}
 }
 
+func (qc *QuestionController) handleGetQuestions() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var baseResponse response.BaseResponse
+
+		questions, err := qc.questionService.GetAllQuestions()
+		if err != nil {
+			baseResponse.DefaultInternalError()
+			errRes := response.NewErrorResponseValue("get_error", err.Error())
+			baseResponse.Errors = response.NewArrErrorResponse(errRes)
+			c.AbortWithStatusJSON(baseResponse.Code, baseResponse)
+			return
+		}
+
+		baseResponse.DefaultOK()
+		baseResponse.Data = gin.H{"questions": questions}
+		c.JSON(baseResponse.Code, baseResponse)
+	}
+}
+
 func (qc *QuestionController) InitializeController() {
 	qc.questionGroup.POST("", qc.authMiddleware.Auth(), qc.handleNewQuestion())
+	qc.questionGroup.GET("", qc.handleGetQuestions())
 }
 
 func NewQuestionController(rg *gin.RouterGroup, qs service.QuestionService, am middleware.AuthMiddleware) *QuestionController {

@@ -7,6 +7,7 @@ import (
 	userRepo "github.com/tudemaha/tujuhin-be/internal/auth/repository"
 	authService "github.com/tudemaha/tujuhin-be/internal/auth/service"
 	questionController "github.com/tudemaha/tujuhin-be/internal/question/controller"
+	questionQuery "github.com/tudemaha/tujuhin-be/internal/question/query"
 	questionRepo "github.com/tudemaha/tujuhin-be/internal/question/repository"
 	questionService "github.com/tudemaha/tujuhin-be/internal/question/service"
 	"github.com/tudemaha/tujuhin-be/pkg/hasher"
@@ -27,7 +28,8 @@ func InitializeControllers(r *gin.Engine, db *sqlx.DB) {
 
 	questionRoutes := r.Group("/questions")
 	questionRepoImpl := questionRepo.NewQuestionRepository(db)
-	questionServiceImpl := questionService.NewQuestionService(questionRepoImpl)
+	questionQeuryImpl := questionQuery.NewQueryQuery(db)
+	questionServiceImpl := questionService.NewQuestionService(questionRepoImpl, questionQeuryImpl)
 	questionControllerImpl := questionController.NewQuestionController(questionRoutes, questionServiceImpl, authMiddleware)
 	questionControllerImpl.InitializeController()
 }
