@@ -8,3 +8,7 @@ type UpVoteBody struct {
 	QuestionID string `json:"question_id" validate:"required"`
 	Vote       string `json:"vote" validate:"required,oneof=up down"`
 }
+
+type DeteleVoteBody struct {
+	QuestionID string `json:"question_id" validate:"required"`
+}

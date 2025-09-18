@@ -11,4 +11,5 @@ type QuestionRepository interface {
 	UpdateVoteByID(vm model.QuestionVote) error
 	GetVoteByQuestionUser(questionID, userID string) (model.QuestionVote, error)
 	GetTotalVote(questionID string) (int, error)
+	DeleteVoteByID(voteID string) error
 }

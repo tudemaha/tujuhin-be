@@ -106,10 +106,45 @@ func (qc *QuestionController) handleVote() gin.HandlerFunc {
 	}
 }
 
+func (qc *QuestionController) handleDeleteVote() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var baseResponse response.BaseResponse
+		var body dto.DeteleVoteBody
+		userID := c.MustGet("userID").(string)
+
+		if err := c.Bind(&body); err != nil {
+			baseResponse.DefaultInternalError()
+			resErr := response.NewErrorResponseValue("bind_error", err.Error())
+			baseResponse.Errors = response.NewArrErrorResponse(resErr)
+			c.AbortWithStatusJSON(baseResponse.Code, baseResponse)
+			return
+		}
+
+		if arrError, err := utils.RequestBodyValidator(body); err {
+			baseResponse.DefaultBadRequest()
+			baseResponse.Errors = arrError
+			c.AbortWithStatusJSON(baseResponse.Code, baseResponse)
+			return
+		}
+
+		if err := qc.questionService.DeleteVote(body.QuestionID, userID); err != nil {
+			baseResponse.DefaultBadRequest()
+			resErr := response.NewErrorResponseValue("delete_error", err.Error())
+			baseResponse.Errors = response.NewArrErrorResponse(resErr)
+			c.AbortWithStatusJSON(baseResponse.Code, baseResponse)
+			return
+		}
+
+		baseResponse.DefaultOK()
+		c.JSON(baseResponse.Code, baseResponse)
+	}
+}
+
 func (qc *QuestionController) InitializeController() {
 	qc.questionGroup.POST("", qc.authMiddleware.Auth(), qc.handleNewQuestion())
 	qc.questionGroup.GET("", qc.authMiddleware.Auth(), qc.handleGetQuestions())
-	qc.questionGroup.PATCH("/vote", qc.authMiddleware.Auth(), qc.handleVote())
+	qc.questionGroup.PATCH("/votes", qc.authMiddleware.Auth(), qc.handleVote())
+	qc.questionGroup.DELETE("/votes", qc.authMiddleware.Auth(), qc.handleDeleteVote())
 }
 
 func NewQuestionController(rg *gin.RouterGroup, qs service.QuestionService, am middleware.AuthMiddleware) *QuestionController {

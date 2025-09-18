@@ -81,6 +81,35 @@ func (s questionServiceImpl) Vote(questionID, userID, newVote string) error {
 		return errors.New("already vote for current question")
 	}
 
+	if err := s.updateVote(questionID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s questionServiceImpl) DeleteVote(questionID, userID string) error {
+	vote, err := s.questionRepo.GetVoteByQuestionUser(questionID, userID)
+	if err != nil {
+		return err
+	}
+
+	if vote.VoteState == nil {
+		return errors.New("vote not found for current question")
+	}
+
+	if err := s.questionRepo.DeleteVoteByID(vote.ID.String()); err != nil {
+		return err
+	}
+
+	if err := s.updateVote(questionID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s questionServiceImpl) updateVote(questionID string) error {
 	totalVote, err := s.questionRepo.GetTotalVote(questionID)
 	if err != nil {
 		return err

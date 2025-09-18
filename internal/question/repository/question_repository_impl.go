@@ -86,12 +86,33 @@ func (q questionRepositoryImpl) GetTotalVote(questionID string) (int, error) {
 	stmt := `SELECT SUM(CASE WHEN vote_state = 'up' THEN 1 ELSE -1 END) 
 		FROM question_votes WHERE question_id = $1`
 
+	var voteCount *int
+	if err := q.DB.Get(&voteCount, stmt, QID); err != nil {
+		return 0, err
+	}
+
 	var totalVote int
-	if err := q.DB.Get(&totalVote, stmt, QID); err != nil {
-		return totalVote, err
+	if voteCount == nil {
+		totalVote = 0
+	} else {
+		totalVote = *voteCount
 	}
 
 	return totalVote, nil
+}
+
+func (q questionRepositoryImpl) DeleteVoteByID(voteID string) error {
+	VID := uuid.MustParse(voteID)
+	stmt, err := q.DB.Preparex(`DELETE FROM question_votes WHERE id = $1`)
+	if err != nil {
+		return err
+	}
+
+	if _, err := stmt.Exec(VID); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewQuestionRepository(DB *sqlx.DB) *questionRepositoryImpl {
