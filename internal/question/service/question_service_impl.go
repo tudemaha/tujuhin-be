@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"github.com/tudemaha/tujuhin-be/internal/question/dto"
 	"github.com/tudemaha/tujuhin-be/internal/question/model"
@@ -50,6 +52,45 @@ func (s questionServiceImpl) GetAllQuestions(userID string) (dto.QuestionsRespon
 	}
 
 	return questionsDto, nil
+}
+
+func (s questionServiceImpl) Vote(questionID, userID, newVote string) error {
+	vote, err := s.questionRepo.GetVoteByQuestionUser(questionID, userID)
+	if err != nil {
+		return err
+	}
+
+	var voteStr string
+	if vote.VoteState != nil {
+		voteStr = *vote.VoteState
+	}
+
+	if voteStr == "" {
+		vote.QuestionID = uuid.MustParse(questionID)
+		vote.UserID = uuid.MustParse(userID)
+		vote.VoteState = &newVote
+		if err := s.questionRepo.CreateNewVote(vote); err != nil {
+			return err
+		}
+	} else if voteStr != newVote {
+		vote.VoteState = &newVote
+		if err := s.questionRepo.UpdateVoteByID(vote); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("already vote for current question")
+	}
+
+	totalVote, err := s.questionRepo.GetTotalVote(questionID)
+	if err != nil {
+		return err
+	}
+
+	if err := s.questionRepo.UpdateTotalVote(totalVote, questionID); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewQuestionService(qr repository.QuestionRepository, qq query.QuestionQuery) *questionServiceImpl {

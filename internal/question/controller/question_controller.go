@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/tudemaha/tujuhin-be/internal/question/dto"
 	"github.com/tudemaha/tujuhin-be/internal/question/service"
@@ -69,9 +71,45 @@ func (qc *QuestionController) handleGetQuestions() gin.HandlerFunc {
 	}
 }
 
+func (qc *QuestionController) handleVote() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var baseResponse response.BaseResponse
+		var body dto.UpVoteBody
+		userID := c.MustGet("userID").(string)
+
+		if err := c.Bind(&body); err != nil {
+			baseResponse.DefaultInternalError()
+			resErr := response.NewErrorResponseValue("bind_error", err.Error())
+			baseResponse.Errors = response.NewArrErrorResponse(resErr)
+			c.AbortWithStatusJSON(baseResponse.Code, baseResponse)
+			return
+		}
+
+		if arrError, err := utils.RequestBodyValidator(body); err {
+			baseResponse.DefaultBadRequest()
+			baseResponse.Errors = arrError
+			c.AbortWithStatusJSON(baseResponse.Code, baseResponse)
+			return
+		}
+
+		if err := qc.questionService.Vote(body.QuestionID, userID, body.Vote); err != nil {
+			baseResponse.DefaultBadRequest()
+			resErr := response.NewErrorResponseValue("update_error", err.Error())
+			baseResponse.Errors = response.NewArrErrorResponse(resErr)
+			c.AbortWithStatusJSON(baseResponse.Code, baseResponse)
+			return
+		}
+
+		baseResponse.DefaultOK()
+		baseResponse.Message = fmt.Sprintf("success vote %s question", body.Vote)
+		c.JSON(baseResponse.Code, baseResponse)
+	}
+}
+
 func (qc *QuestionController) InitializeController() {
 	qc.questionGroup.POST("", qc.authMiddleware.Auth(), qc.handleNewQuestion())
 	qc.questionGroup.GET("", qc.authMiddleware.Auth(), qc.handleGetQuestions())
+	qc.questionGroup.PATCH("/vote", qc.authMiddleware.Auth(), qc.handleVote())
 }
 
 func NewQuestionController(rg *gin.RouterGroup, qs service.QuestionService, am middleware.AuthMiddleware) *QuestionController {

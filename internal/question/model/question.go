@@ -24,6 +24,7 @@ type QuestionWithOwner struct {
 type QuestionVote struct {
 	ID         uuid.UUID `db:"id"`
 	QuestionID uuid.UUID `db:"question_id"`
+	UserID     uuid.UUID `db:"user_id"`
 	VoteState  *string   `db:"vote_state"`
 }
 
