@@ -25,6 +25,14 @@ func (am authMiddleware) Auth() gin.HandlerFunc {
 			return
 		}
 
+		if rawAuthHeader[0] != "Bearer" {
+			baseResponse.DefaultBadRequest()
+			errRes := response.NewErrorResponseValue("auth_error", "Invalid Authorization header")
+			baseResponse.Errors = response.NewArrErrorResponse(errRes)
+			c.AbortWithStatusJSON(baseResponse.Code, baseResponse)
+			return
+		}
+
 		userID, err := am.authService.ValidateToken(rawAuthHeader[1])
 		if err != nil {
 			baseResponse.DefaultUnauthorized()
