@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -16,14 +17,14 @@ func main() {
 		log.Fatalf("ERROR load env fatal error: %v", err)
 	}
 
-	httpAddress := os.Getenv("ADDRESS")
+	httpPort := os.Getenv("PORT")
 	httpServer := server.NewServer()
 	db := database.GetDatabase()
 
 	log.Println("INFO controllers: initializing controllers")
 	controller.InitializeControllers(httpServer.Router, db)
 
-	if err := httpServer.Start(httpAddress); err != nil {
+	if err := httpServer.Start(fmt.Sprintf(":%s", httpPort)); err != nil {
 		log.Fatalf("ERROR start server fatal error: %v", err)
 	}
 
