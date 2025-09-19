@@ -22,8 +22,7 @@ func (qq questionQueryImpl) GetAllQuestionWithOwner(userID string) (model.Questi
 		v.id AS "vote.id", v.vote_state AS "vote.vote_state" 
 		FROM questions q 
 		INNER JOIN users u ON u.id = q.user_id 
-		LEFT JOIN question_votes v ON v.question_id = q.id AND v.user_id = u.id 
-		WHERE v.user_id = $1 
+		LEFT JOIN question_votes v ON v.question_id = q.id AND v.user_id = $1 
 		ORDER BY q.created_at DESC 
 	`
 
