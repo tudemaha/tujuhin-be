@@ -6,7 +6,7 @@ import (
 
 type QuestionService interface {
 	CreateQuestion(qd dto.QuestionRequestBody, owner string) error
-	GetAllQuestions(userID string) (dto.QuestionsResponse, error)
+	GetAllQuestions() (dto.QuestionsResponse, error)
 	Vote(questionID, userID, newVote string) error
 	DeleteVote(questionID, userID string) error
 }

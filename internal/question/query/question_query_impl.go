@@ -1,7 +1,6 @@
 package query
 
 import (
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/tudemaha/tujuhin-be/internal/question/model"
 )
@@ -10,11 +9,8 @@ type questionQueryImpl struct {
 	db *sqlx.DB
 }
 
-func (qq questionQueryImpl) GetAllQuestionWithOwner(userID string) (model.QuestionsWithOwner, error) {
+func (qq questionQueryImpl) GetAllQuestionWithOwner() (model.QuestionsWithOwner, error) {
 	var questionsWithOwner model.QuestionsWithOwner
-
-	uID := uuid.MustParse(userID)
-
 	stmt := `
 		SELECT 
 		q.id AS "id", q.question AS "question", q.total_vote AS "total_vote", q.created_at as "created_at", 
@@ -23,11 +19,10 @@ func (qq questionQueryImpl) GetAllQuestionWithOwner(userID string) (model.Questi
 		FROM questions q 
 		INNER JOIN users u ON u.id = q.user_id 
 		LEFT JOIN question_votes v ON v.question_id = q.id AND v.user_id = u.id 
-		WHERE u.id = $1 
 		ORDER BY q.created_at DESC 
 	`
 
-	err := qq.db.Select(&questionsWithOwner, stmt, uID)
+	err := qq.db.Select(&questionsWithOwner, stmt)
 	if err != nil {
 		return questionsWithOwner, err
 	}
