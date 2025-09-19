@@ -5,5 +5,5 @@ import (
 )
 
 type QuestionQuery interface {
-	GetAllQuestionWithOwner() (model.QuestionsWithOwner, error)
+	GetAllQuestionWithOwner(userID string) (model.QuestionsWithOwner, error)
 }

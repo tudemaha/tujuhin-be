@@ -54,8 +54,9 @@ func (qc *QuestionController) handleNewQuestion() gin.HandlerFunc {
 func (qc *QuestionController) handleGetQuestions() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var baseResponse response.BaseResponse
+		userID := c.MustGet("userID").(string)
 
-		questions, err := qc.questionService.GetAllQuestions()
+		questions, err := qc.questionService.GetAllQuestions(userID)
 		if err != nil {
 			baseResponse.DefaultInternalError()
 			errRes := response.NewErrorResponseValue("get_error", err.Error())
